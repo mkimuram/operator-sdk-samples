@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: memcached-operator
+  namespace: memcached
 spec:
   replicas: 1
   selector:
@@ -16,15 +17,13 @@ spec:
       containers:
         - name: memcached-operator
           # Replace this with the built image name
-          image: REPLACE_IMAGE
+          image: quay.io/example/memcached-operator:v0.0.1
           command:
           - memcached-operator
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+              value: ""
             - name: POD_NAME
               valueFrom:
                 fieldRef:
