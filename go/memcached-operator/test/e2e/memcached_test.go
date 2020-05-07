@@ -50,7 +50,7 @@ func TestMemcached(t *testing.T) {
 }
 
 func memcachedScaleTest(t *testing.T, f *framework.Framework, ctx *framework.TestCtx) error {
-	namespace, err := ctx.GetNamespace()
+	namespace, err := ctx.GetOperatorNamespace()
 	if err != nil {
 		return fmt.Errorf("could not get namespace: %v", err)
 	}
@@ -98,7 +98,7 @@ func MemcachedCluster(t *testing.T) {
 		t.Fatalf("failed to initialize cluster resources: %v", err)
 	}
 	t.Log("Initialized cluster resources")
-	namespace, err := ctx.GetNamespace()
+	namespace, err := ctx.GetOperatorNamespace()
 	if err != nil {
 		t.Fatal(err)
 	}
