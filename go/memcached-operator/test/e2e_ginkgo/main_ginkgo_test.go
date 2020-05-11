@@ -38,23 +38,21 @@ var (
 	cleanupRetryInterval = time.Second * 1
 	cleanupTimeout       = time.Second * 5
 
-	objs    = []runtime.Object{&operator.MemcachedList{}}
-	Testing *testing.T
+	objs = []runtime.Object{&operator.MemcachedList{}}
 )
 
 func TestGinkgo(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
-	Testing = t
 	ginkgo.RunSpecs(t, "E2e Suite")
 }
 
-func initOperator(t *testing.T, name string, objs []runtime.Object) (*framework.TestCtx, string) {
+func initOperator(name string, objs []runtime.Object) (*framework.TestCtx, string) {
 	for _, obj := range objs {
 		err := framework.AddToFrameworkScheme(apis.AddToScheme, obj)
 		gomega.Expect(err).NotTo(gomega.HaveOccurred(), "failed to add custom resource scheme to framework")
 	}
 
-	ctx := framework.NewTestCtx(t)
+	ctx := framework.NewTestCtx(nil)
 	err := ctx.InitializeClusterResources(&framework.CleanupOptions{TestContext: ctx, Timeout: cleanupTimeout, RetryInterval: cleanupRetryInterval})
 	gomega.Expect(err).NotTo(gomega.HaveOccurred(), "failed to initialize cluster resources")
 
@@ -66,7 +64,7 @@ func initOperator(t *testing.T, name string, objs []runtime.Object) (*framework.
 	// get global framework variables
 	f := framework.Global
 	// wait for memcached-operator to be ready
-	err = e2eutil.WaitForOperatorDeployment(t, f.KubeClient, namespace, name, 1, retryInterval, timeout)
+	err = e2eutil.WaitForOperatorDeployment(nil, f.KubeClient, namespace, name, 1, retryInterval, timeout)
 	gomega.Expect(err).NotTo(gomega.HaveOccurred(), "operator failed to be ready")
 
 	return ctx, namespace

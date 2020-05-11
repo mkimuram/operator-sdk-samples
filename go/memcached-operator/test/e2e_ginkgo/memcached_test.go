@@ -17,7 +17,6 @@ package e2e_ginkgo
 import (
 	goctx "context"
 	"fmt"
-	"testing"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
@@ -33,13 +32,11 @@ var _ = ginkgo.Describe("[memcached]", func() {
 	var (
 		ctx *framework.TestCtx
 		f   *framework.Framework
-		t   *testing.T
 		ns  string
 	)
 	ginkgo.BeforeEach(func() {
-		t = Testing
 		f = framework.Global
-		ctx, ns = initOperator(t, operatorName, objs)
+		ctx, ns = initOperator(operatorName, objs)
 	})
 
 	ginkgo.AfterEach(func() {
@@ -47,16 +44,16 @@ var _ = ginkgo.Describe("[memcached]", func() {
 	})
 
 	ginkgo.It("should scale 3 to 4", func() {
-		memcachedScaleTest(t, f, ctx, ns, 3, 4)
+		memcachedScaleTest(f, ctx, ns, 3, 4)
 	})
 
 	ginkgo.It("[slow]should scale 3 to 5", func() {
-		memcachedScaleTest(t, f, ctx, ns, 3, 5)
+		memcachedScaleTest(f, ctx, ns, 3, 5)
 	})
 
 })
 
-func memcachedScaleTest(t *testing.T, f *framework.Framework, ctx *framework.TestCtx, ns string, origSize, scaleSize int) {
+func memcachedScaleTest(f *framework.Framework, ctx *framework.TestCtx, ns string, origSize, scaleSize int) {
 	// create memcached custom resource
 	exampleMemcached := &operator.Memcached{
 		ObjectMeta: metav1.ObjectMeta{
@@ -74,7 +71,7 @@ func memcachedScaleTest(t *testing.T, f *framework.Framework, ctx *framework.Tes
 	gomega.Expect(err).NotTo(gomega.HaveOccurred(), "failed to create memcahced custom resource")
 
 	// wait for example-memcached to reach origSize replicas
-	err = e2eutil.WaitForDeployment(t, f.KubeClient, ns, "example-memcached", origSize, retryInterval, timeout)
+	err = e2eutil.WaitForDeployment(nil, f.KubeClient, ns, "example-memcached", origSize, retryInterval, timeout)
 	gomega.Expect(err).NotTo(gomega.HaveOccurred(), fmt.Sprintf("memcached replica didn't reach to specified size %d", origSize))
 
 	err = f.Client.Get(goctx.TODO(), types.NamespacedName{Name: "example-memcached", Namespace: ns}, exampleMemcached)
@@ -85,6 +82,6 @@ func memcachedScaleTest(t *testing.T, f *framework.Framework, ctx *framework.Tes
 	gomega.Expect(err).NotTo(gomega.HaveOccurred(), "failed to update example-memcached")
 
 	// wait for example-memcached to reach scaleSize replicas
-	err = e2eutil.WaitForDeployment(t, f.KubeClient, ns, "example-memcached", scaleSize, retryInterval, timeout)
+	err = e2eutil.WaitForDeployment(nil, f.KubeClient, ns, "example-memcached", scaleSize, retryInterval, timeout)
 	gomega.Expect(err).NotTo(gomega.HaveOccurred(), fmt.Sprintf("memcached replica didn't reach to specified size %d after scale", scaleSize))
 }
