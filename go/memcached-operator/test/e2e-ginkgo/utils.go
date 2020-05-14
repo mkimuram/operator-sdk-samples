@@ -280,6 +280,7 @@ func readFromYamlFunc(file string) readFunc {
 
 type patchOption struct {
 	operatorNamespace string
+	watchNamespace    string
 	image             string
 	imagePullPolicy   string
 }
@@ -346,6 +347,16 @@ func defaultPatchFunc(opt patchOption) patchFunc {
 				if opt.imagePullPolicy != "" {
 					container.ImagePullPolicy = corev1.PullPolicy(opt.imagePullPolicy)
 				}
+				// Change env
+				envs := []corev1.EnvVar{}
+				for _, env := range container.Env {
+					if env.Name == "WATCH_NAMESPACE" && env.Value == "" && env.ValueFrom == nil {
+						// cluster scope operator needs to restrict its scope for watch namespace
+						env.Value = opt.watchNamespace
+					}
+					envs = append(envs, env)
+				}
+				container.Env = envs
 				containers = append(containers, container)
 			}
 			deploy.Spec.Template.Spec.Containers = containers
