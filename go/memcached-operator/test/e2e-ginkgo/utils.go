@@ -119,25 +119,25 @@ func teardownCRDs(manifests []string) error {
 	return nil
 }
 
-func initClient(addToSchemes []addToSchemeFunc) (client.Client, error) {
+func initClient(addToSchemes []addToSchemeFunc) (client.Client, *rest.Config, error) {
 	// Get kubeconfig
 	conf, err := getKubeconfig()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	// Get Scheme
 	scheme, err := getScheme(addToSchemes)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Create dynamic client
 	cl, err := client.New(conf, client.Options{Scheme: scheme})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create dynamic client: %v", err)
+		return nil, nil, fmt.Errorf("failed to create dynamic client: %v", err)
 	}
 
-	return cl, nil
+	return cl, conf, nil
 }
 
 func initOperator(cl client.Client, manifests []string, patch func(*unstructured.Unstructured) error) error {
